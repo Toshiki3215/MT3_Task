@@ -60,9 +60,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	SetCameraPositionAndTargetAndUpVec
 	(
-		Vector3(0.0f, 0.0f, -120.0f), //カメラ位置
+		//Vector3(0.0f, 0.0f, -120.0f), //カメラ位置
+		Vector3(0.0f, 200.0f, 0.0f), //カメラ位置
 		Vector3(0.0f, 0.0f, 0.0f),  //カメラの注視点
-		Vector3(0.0f, 1.0f, 0.0f)   //カメラの上の向き
+		Vector3(0.0f, 0.0f, 1.0f)   //カメラの上の向き
 	);
 
 	//時間経過に必要なデータ
@@ -72,8 +73,10 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 	//補間で使うデータ
 	//　start → end を 5 [s]で完成させる
-	Vector3 start(-100.0f, 0, 0); //スタート地点
-	Vector3 end(+100.0f, 0, 0);   //エンド地点
+	Vector3 p0(-100.0f, 0.0f, 0.0f); //スタート地点
+	Vector3 p1(0.0f, 0.0f, +100.0f); //制御点
+	Vector3 p2(0.0f, 0.0f, -100.0f); //制御点
+	Vector3 p3(+100.0f, 0.0f, 0.0f); //エンド地点
 	float maxTime = 5.0f;
 	float timeRate;
 
@@ -112,7 +115,17 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		timeRate = min(elapsedTime / maxTime, 1.0f);
 
-		position = lerp(start, end, timeRate);
+		Vector3 a = lerp(p0, p1, timeRate);
+
+		Vector3 b = lerp(p1, p2, timeRate);
+
+		Vector3 c = lerp(p2, p3, timeRate);
+
+		Vector3 ab = lerp(a, b, timeRate);
+
+		Vector3 bc = lerp(b, c, timeRate);
+
+		position = lerp(ab, bc, timeRate);
 
 		// 描画処理
 		//画面を消去
@@ -123,11 +136,20 @@ int WINAPI WinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _
 
 		//球の描画
 		DrawSphere3D(position, 5.0f, 32, GetColor(255, 0, 0), GetColor(255, 255, 255), TRUE);
+
+		DrawSphere3D(p0, 3.0f, 32, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE);
+		DrawSphere3D(p1, 3.0f, 32, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE);
+		DrawSphere3D(p2, 3.0f, 32, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE);
+		DrawSphere3D(p3, 3.0f, 32, GetColor(0, 255, 0), GetColor(255, 255, 255), TRUE);
 		
-		DrawFormatString(0, 0, GetColor(255, 255, 255), "position (%5.1f,%5.1f,%5.1f)", position.x, position.y, position.z);
+		DrawFormatString(0, 0, GetColor(255, 255, 255), "position (%6.1f,%6.1f,%6.1f)", position.x, position.y, position.z);
 
 		DrawFormatString(0, 20, GetColor(255, 255, 255), "%7.3f [s]", elapsedTime);
 		DrawFormatString(0, 40, GetColor(255, 255, 255), "[R] : Restart");
+
+		DrawFormatString(0,  60, GetColor(255, 255, 255), "p0(%6.1f,%6.1f,%6.1f)", p0.x, p0.y, p0.z);
+		DrawFormatString(0,  80, GetColor(255, 255, 255), "p1(%6.1f,%6.1f,%6.1f)", p1.x, p1.y, p1.z);
+		DrawFormatString(0, 100, GetColor(255, 255, 255), "p2(%6.1f,%6.1f,%6.1f)", p2.x, p2.y, p2.z);
 
 		//---------  ここまでにプログラムを記述  ---------//
 		// (ダブルバッファ)裏面
